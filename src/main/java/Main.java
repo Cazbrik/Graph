@@ -1,9 +1,9 @@
-import src.Graph;
+import graph.Graph;
 
 public class Main{
 
     public static void main(String ... args){
-        Graph<String> graph = new Graph<>();
+        Graph<String, Integer> graph = new Graph<>();
     }
 
 }

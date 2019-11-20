@@ -1,18 +1,18 @@
-package src;
+package graph;
 
 import java.util.Objects;
 
-public class Edge<T> {
+public class Edge<T, U> {
 
-    private float cost;
+    private U cost;
     private T start;
     private T end;
 
     public Edge(T start, T end){
-        this(start, end, 0f);
+        this(start, end, null);
     }
 
-    public Edge(T start, T end, float cost){
+    public Edge(T start, T end, U cost){
         this.start = Objects.requireNonNull(start, "Start vertex must not be null");
         this.end = Objects.requireNonNull(end, "End vertex must not be null");
         this.cost = cost;
@@ -24,7 +24,7 @@ public class Edge<T> {
     }
 
     public void change(T old, T changed){
-        if(!this.contains(old)) return;
+        if(!this.contains(old) || changed == null) return;
         if(this.end.equals(old)) this.end = changed;
         if(this.start.equals(old)) this.start = changed;
     }
@@ -34,17 +34,30 @@ public class Edge<T> {
 
         if(obj == null) return false;
         if(obj == this) return true;
-        if(!(obj instanceof Edge<?>)) return false;
+        if(!(obj instanceof Edge<?, ?>)) return false;
 
-        Edge<?> edge = (Edge<?>) obj;
+        Edge<?, ?> edge = (Edge<?, ?>) obj;
         if(edge.start == null || edge.end == null) return false;
-        return edge.start.equals(this.start) && edge.end.equals(this.end) && edge.cost == this.cost;
+        return edge.start.equals(this.start) && edge.end.equals(this.end) && ((edge.cost == null && this.cost == null) || edge.cost.equals(this.cost));
 
     }
     
     @Override
     public int hashCode(){
         return this.start.hashCode() * this.end.hashCode() * (int) this.cost;
+    }
+
+    @Override
+    public String toString(){
+        return this.start + " -> " + this.end + " : " + this.cost;
+    }
+
+    public T getStart(){
+        return this.start;
+    }
+
+    public T getEnd(){
+        return this.end;
     }
 
 }
