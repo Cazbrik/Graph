@@ -111,14 +111,17 @@ public class Graph<T, U> {
         return related;
     }
 
+    private void reachableRec(T vertex, Set<T> reached){
+        for(T el : this.getRelatedVertex(vertex)){
+            if(reached.add(el)){
+                reachableRec(el, reached);
+            }
+        } 
+    }
+
     public Set<T> reachableFrom(T vertex){
-        final Set<T> reached = new HashSet<>();
-        BiFunction<T, List<T>, T> browseFunc = (st, list) ->{
-            T next = null;
-            for(T el : list) if(reached.add(el)) next = el;
-            return next;
-        };
-        this.browse(vertex, browseFunc);
+        Set<T> reached = new HashSet<>();
+        this.reachableRec(vertex, reached);
         return reached;
     }
 
