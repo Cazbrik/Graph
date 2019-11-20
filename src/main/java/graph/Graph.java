@@ -6,6 +6,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import java.lang.StringBuilder;
 
 public class Graph<T, U> {
@@ -33,8 +37,7 @@ public class Graph<T, U> {
     @Override
     public String toString(){
         StringBuilder builder = new StringBuilder();
-        for(Edge<T, U> edge : this.edges)
-            builder.append(edge.toString()).append('\n');
+        this.edges.forEach(e -> builder.append(e.toString()).append('\n'));
         return builder.toString();
     }
 
@@ -45,26 +48,17 @@ public class Graph<T, U> {
     }
 
     public boolean remove(T vertex){
-
-        Iterator<Edge<T, U>> iter = this.edges.iterator();
-        while(iter.hasNext()){
-            Edge<T, U> element = iter.next();
-            if(element.contains(vertex)) iter.remove();
-        }
-
+        List<Edge<T, U>> toRemove = this.edges.stream().filter(x -> x.contains(vertex)).collect(Collectors.toList());
+        this.edges.removeAll(toRemove);
         return this.vertices.remove(vertex);
-
     }
 
     public boolean replace(T old, T newOne){
-        
         if(!this.vertices.contains(old)) return false;
-        
-        for(Edge<T, U> edge : this.edges) edge.change(old, newOne);
+        this.edges.forEach(e -> e.change(old, newOne));
         this.vertices.remove(old);
         this.vertices.add(newOne);
         return true;
-
     }
 
     public boolean merge(T v1, T v2, BiFunction<T, T, T> merge){
@@ -98,25 +92,15 @@ public class Graph<T, U> {
     }
 
     public List<Edge<T, U>> getRelatedEdge(T vertex){
-        List<Edge<T, U>> related = new ArrayList<>();
-        for(Edge<T, U> edge : this.edges) 
-            if(edge.contains(vertex)) related.add(edge);
-        return related;
+        return this.selectEdges(edge -> edge.contains(vertex));
     }
 
     public List<T> getRelatedVertex(T vertex){
-        List<T> related = new ArrayList<>();
-        for(Edge<T, U> edge : this.getRelatedEdge(vertex))
-            if(edge.getStart().equals(vertex)) related.add(edge.getEnd());
-        return related;
+        return this.getRelatedEdge(vertex).stream().filter(x -> x.getStart().equals(vertex)).map(x -> x.getEnd()).collect(Collectors.toList());
     }
 
     private void reachableRec(T vertex, Set<T> reached){
-        for(T el : this.getRelatedVertex(vertex)){
-            if(reached.add(el)){
-                reachableRec(el, reached);
-            }
-        } 
+        for(T el : this.getRelatedVertex(vertex)) if(reached.add(el)) reachableRec(el, reached);
     }
 
     public Set<T> reachableFrom(T vertex){
@@ -125,4 +109,35 @@ public class Graph<T, U> {
         return reached;
     }
 
+    public boolean isConnected(){
+
+        if(this.vertices.isEmpty() || this.vertices.size() > this.edges.size() + 1) return false;
+
+        Set<T> reachVertices  = this.reachableFrom(this.vertices.iterator().next());
+        if(reachVertices.size() != this.vertices.size()) return false;
+        for(T vertex : reachVertices) if(!this.vertices.contains(vertex)) return false;
+
+        return true;
+    }
+
+    public List<Edge<T, U>> selectEdges(Function<Edge<T, U>, Boolean> filter){
+        if(filter == null) return new ArrayList<>();
+        return this.edges.stream().filter( el -> filter.apply(el)).collect(Collectors.toList());
+    }
+
+    public List<T> selectVertices(Function<T, Boolean> filter){
+        if(filter == null) return new ArrayList<>();
+        return this.vertices.stream().filter( el -> filter.apply(el)).collect(Collectors.toList());
+    }
+
+    public void applyOnVertices(Function<T, Boolean> filter, Consumer<T> func){
+        if(func == null) return;
+        for(T vertex : this.selectVertices(filter)) func.accept(vertex);
+    }
+
+    public void applyOnEdges(Function<Edge<T, U>, Boolean> filter, Consumer<Edge<T, U>> func){
+        if(func == null) return;
+        for(Edge<T, U> edge : this.selectEdges(filter)) func.accept(edge);
+    }
+    
 }

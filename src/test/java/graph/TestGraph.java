@@ -20,11 +20,11 @@ public class TestGraph{
         Set<String> vertices = new HashSet<>(Arrays.asList("Red", "Blue", "Green", "Yellow", "Black", "White"));
         List<Edge<String, Integer>> edges = new ArrayList<>();
         edges.add(new Edge<>("Red", "Blue"));
-        edges.add(new Edge<>("Blue", "Green"));
+        edges.add(new Edge<>("Red", "Green"));
         edges.add(new Edge<>("Green", "Yellow"));
-        edges.add(new Edge<>("Yellow", "Black"));
-        edges.add(new Edge<>("Black", "White"));
-        edges.add(new Edge<>("White", "Red"));
+        edges.add(new Edge<>("Yellow", "Red"));
+        edges.add(new Edge<>("Blue", "White"));
+        edges.add(new Edge<>("White", "Black"));
         this.graph = new Graph<String, Integer>(vertices, edges);
     }
 
@@ -49,7 +49,7 @@ public class TestGraph{
 
         Assertions.assertTrue(this.graph.remove("Red"));
         Assertions.assertEquals(nbV - 1, this.graph.getVertices().size());
-        Assertions.assertEquals(nbE - 2, this.graph.getEdges().size());
+        Assertions.assertEquals(nbE - 3, this.graph.getEdges().size());
     }
 
     @Test
@@ -86,6 +86,8 @@ public class TestGraph{
         int nbV = this.graph.getVertices().size();
         Assertions.assertFalse(this.graph.replace("Purple", "Yellow"));
         Assertions.assertEquals(nbV, this.graph.getVertices().size());
+        this.checkVertexEdgeAndExist("Purple", 0, false);
+        this.checkVertexEdgeAndExist("Yellow", 2, true);
     }
 
     @Test
@@ -103,6 +105,8 @@ public class TestGraph{
         BiFunction<String, String, String> func = (s1, s2) -> s1 + s2;
         Assertions.assertFalse(this.graph.merge("Red", "Purple", func));
         Assertions.assertEquals(nbV, this.graph.getVertices().size());
+        this.checkVertexEdgeAndExist("RedPurple", 0, false);
+        this.checkVertexEdgeAndExist("Red", 3, true);
     }
 
     @Test
@@ -111,6 +115,8 @@ public class TestGraph{
         BiFunction<String, String, String> func = (s1, s2) -> s1 + s2;
         Assertions.assertFalse(this.graph.merge("Purple", "Red", func));
         Assertions.assertEquals(nbV, this.graph.getVertices().size());
+        this.checkVertexEdgeAndExist("Red", 3, true);
+        this.checkVertexEdgeAndExist("Purple", 0, false);
     }
 
     @Test
@@ -119,6 +125,8 @@ public class TestGraph{
         BiFunction<String, String, String> func = (s1, s2) -> s1 + s2;
         Assertions.assertFalse(this.graph.merge("Red", "Yellow", null));
         Assertions.assertEquals(nbV, this.graph.getVertices().size());
+        this.checkVertexEdgeAndExist("Yellow", 2, true);
+        this.checkVertexEdgeAndExist("Red", 3, true);
     }
 
     @Test
@@ -137,7 +145,7 @@ public class TestGraph{
         int nb = this.graph.getEdges().size();
         Assertions.assertFalse(this.graph.add(new Edge<>("Purple", "Red")));
         Assertions.assertEquals(nb , this.graph.getEdges().size());
-        this.checkVertexEdgeAndExist("Red", 2, true);
+        this.checkVertexEdgeAndExist("Red", 3, true);
         this.checkVertexEdgeAndExist("Purple", 0, false);
     }
 
@@ -146,7 +154,7 @@ public class TestGraph{
         int nb = this.graph.getEdges().size();
         Assertions.assertTrue(this.graph.add(new Edge<>("Yellow", "Red")));
         Assertions.assertEquals(nb + 1, this.graph.getEdges().size());
-        this.checkVertexEdgeAndExist("Red", 3, true);
+        this.checkVertexEdgeAndExist("Red", 4, true);
         this.checkVertexEdgeAndExist("Yellow", 3, true);
     }
 
@@ -155,17 +163,17 @@ public class TestGraph{
         int nb = this.graph.getEdges().size();
         Assertions.assertFalse(this.graph.remove(new Edge<>("Purple", "Red")));
         Assertions.assertEquals(nb, this.graph.getEdges().size());
-        this.checkVertexEdgeAndExist("Red", 2, true);
+        this.checkVertexEdgeAndExist("Red", 3, true);
         this.checkVertexEdgeAndExist("Purple", 0, false);
     }
 
     @Test
     public void testRemovePresentEdge(){
         int nb = this.graph.getEdges().size();
-        Assertions.assertTrue(this.graph.remove(new Edge<>("White", "Red")));
+        Assertions.assertTrue(this.graph.remove(new Edge<>("Yellow", "Red")));
         Assertions.assertEquals(nb - 1, this.graph.getEdges().size());
-        this.checkVertexEdgeAndExist("White", 1, true);
-        this.checkVertexEdgeAndExist("Red", 1, true);
+        this.checkVertexEdgeAndExist("Red", 2, true);
+        this.checkVertexEdgeAndExist("Yellow", 1, true);
     }
 
     @Test
@@ -183,9 +191,10 @@ public class TestGraph{
     @Test
     public void testGetRelatedEdgePresentNode(){
         List<Edge<String, Integer>> list = this.graph.getRelatedEdge("Red");
-        Assertions.assertEquals(2, list.size());
-        Assertions.assertTrue(list.contains(new Edge<>("White", "Red")));
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertTrue(list.contains(new Edge<>("Yellow", "Red")));
         Assertions.assertTrue(list.contains(new Edge<>("Red", "Blue")));
+        Assertions.assertTrue(list.contains(new Edge<>("Red", "Green")));
     }
 
     @Test
@@ -203,8 +212,9 @@ public class TestGraph{
     @Test
     public void testGetRelatedVertexPresentNode(){
         List<String> list = this.graph.getRelatedVertex("Red");
-        Assertions.assertEquals(1, list.size());
+        Assertions.assertEquals(2, list.size());
         Assertions.assertTrue(list.contains("Blue"));
+        Assertions.assertTrue(list.contains("Green"));
     }
 
     @Test
@@ -229,6 +239,22 @@ public class TestGraph{
         Assertions.assertTrue(list.contains("Yellow"));
         Assertions.assertTrue(list.contains("Black"));
         Assertions.assertTrue(list.contains("White"));
+    }
+
+    @Test
+    public void testConnectedGraph(){
+        Assertions.assertTrue(this.graph.isConnected());
+    }
+
+    @Test
+    public void testNotConnectedGraph(){
+        this.graph.add("Purple");
+        Assertions.assertFalse(this.graph.isConnected());
+    }
+
+    @Test
+    public void testNotConnectedEmptyGraph(){
+        Assertions.assertFalse(new Graph<String, Integer>().isConnected());
     }
 
 }
