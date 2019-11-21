@@ -215,3 +215,53 @@ public class Graph<T, U> {
     }
     
 }
+
+class MyFactory {
+    static FilterFactory<Edge<T>> onEdges(... edges) {
+        return new FilterFactory<Edge<T>>(edges);
+    }
+    static FilterFactory<T> onVertices(... vertices) {
+        return new FilterFactory<T>(vertices);
+    }
+}
+
+class FilterFactory<T> {
+    Collection<T> items;
+    Filter<T> filter (Predictate<T> filter) {
+        return new Filter<T>(filter);
+    }
+}
+
+class Filter<T> {
+    Collection<T> items;
+    Predictate<T> filter;
+    Collection<T> select() {
+        return items.stream().filter(filter).collect(Collectors.toList());
+    }
+    void apply(Consumer<Edge<T, U>> func) {...}
+}
+
+f = new FilterFactory(filter)
+
+MyFactory.onEdges(edges).filter(filter).select();
+
+class Graph<T, E, L> {
+    Set<T> vertices;
+    List<E> edges;
+    Function<E, T> getStart;
+    int getMinCountEdges(T a, T b) {
+        for(E edge: edges) {
+            T v = getStart(edge);
+            ...
+        }
+    }
+    abstract L getShortestPath(T a, T b);
+}
+class WeightedGraph<T,U> extends Graph<T, WeightedEdge<T, U>, U> {
+    Function<U, Number> costToNumber;
+    U getMinWeightPath(T a, T b) {/*somme des poids des arêtes parcourues*/}
+    Number getShortestPath(T a, T b) {return costToNumber.apply(getMinWeightPath(a,b));}
+}
+class NonWeightedGraph<T,U> extends Graph<T, Edge<T>, Integer> {
+    Integer getShortestPath(T a, T b) {return getMinCountEdges(a,b);}
+}

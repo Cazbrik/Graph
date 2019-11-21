@@ -2,6 +2,7 @@ package graph;
 
 import java.util.Objects;
 
+// TODO OrientedEdge
 public class Edge<T, U> {
 
     private U cost;
@@ -64,4 +65,35 @@ public class Edge<T, U> {
         return this.cost;
     }
 
+}
+
+class Edge<T> {
+    T start;
+    T end;
+
+    boolean equals(Obj o) {
+        if (o == this) {
+            return true;
+        } else if (o instanceof Edge<?>) {
+            Edge<T> e = (Edge<?>) o;
+            return Objects.equals(start, e.start) && Objects.equals(end, e.end);
+        } else {
+            return false;
+        }
+    }
+}
+class WeightedEdge<T, U> {
+    Edge<T> edge;
+    U cost;
+
+    boolean equals(Obj o) {
+        if (o == this) {
+            return true;
+        } else if (o instanceof WeightedEdge<?, ?>) {
+            WeightedEdge<?, ?> e = (WeightedEdge<?, ?>) o;
+            return Objects.equals(edge, e.edge) && Objects.equals(cost, e.cost);
+        } else {
+            return false;
+        }
+    }
 }
