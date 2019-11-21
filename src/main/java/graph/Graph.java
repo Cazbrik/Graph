@@ -9,8 +9,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
-import java.lang.StringBuilder;
 
 public class Graph<T, U> {
 
@@ -18,7 +18,11 @@ public class Graph<T, U> {
     private List<Edge<T, U>> edges;
 
     public Graph(){
-        this(new HashSet<>(), new ArrayList<>());
+        this(new HashSet<>());
+    }
+
+    public Graph(Set<T> vertices){
+        this(vertices, new ArrayList<>());
     }
 
     public Graph(Set<T> vertices, List<Edge<T, U>> edges){
@@ -88,19 +92,24 @@ public class Graph<T, U> {
      * The browseFunc should return null when the all the graph was covered
      */
     public void browse(T start, BiFunction<T, List<T>, T> browseFunc){
-        while(start != null) start = browseFunc.apply(start, this.getRelatedVertex(start));
+        while(start != null) start = browseFunc.apply(start, this.getChildrenVertices(start));
     }
 
     public List<Edge<T, U>> getRelatedEdge(T vertex){
         return this.selectEdges(edge -> edge.contains(vertex));
     }
 
-    public List<T> getRelatedVertex(T vertex){
+    public List<T> getChildrenVertices(T vertex){
         return this.getRelatedEdge(vertex).stream().filter(x -> x.getStart().equals(vertex)).map(x -> x.getEnd()).collect(Collectors.toList());
     }
 
+    public List<T> getParentVertices(T vertex){
+        return this.getRelatedEdge(vertex).stream().filter(x -> x.getEnd().equals(vertex)).map(x -> x.getStart()).collect(Collectors.toList());
+    }
+
     private void reachableRec(T vertex, Set<T> reached){
-        for(T el : this.getRelatedVertex(vertex)) if(reached.add(el)) reachableRec(el, reached);
+        for(T el : this.getChildrenVertices(vertex)) 
+            if(reached.add(el)) reachableRec(el, reached);
     }
 
     public Set<T> reachableFrom(T vertex){
@@ -109,15 +118,54 @@ public class Graph<T, U> {
         return reached;
     }
 
-    public boolean isConnected(){
+    private void reachableToRec(T vertex, Set<T> reached){
+        for(T el : this.getParentVertices(vertex)) 
+            if(reached.add(el)) reachableToRec(el, reached);
+    }
+
+    public Set<T> reachableTo(T vertex){
+        Set<T> reached = new HashSet<>();
+        this.reachableToRec(vertex, reached);
+        return reached;
+    }
+
+    public boolean isStronglyConnected(){
+
+        if(this.vertices.isEmpty() || this.vertices.size() > this.edges.size() + 1) return false;
+        Iterator<T> iter = this.vertices.iterator();
+        
+        while(iter.hasNext()){
+
+            Set<T> reachVertices  = this.reachableFrom(iter.next());
+            if(reachVertices.size() != this.vertices.size()) continue;
+            for(T vertex : reachVertices) if(!this.vertices.contains(vertex)) continue;
+
+            return true;
+        }
+
+        return false;
+
+    }
+
+    public boolean isWeaklyConnected(){
 
         if(this.vertices.isEmpty() || this.vertices.size() > this.edges.size() + 1) return false;
 
-        Set<T> reachVertices  = this.reachableFrom(this.vertices.iterator().next());
-        if(reachVertices.size() != this.vertices.size()) return false;
-        for(T vertex : reachVertices) if(!this.vertices.contains(vertex)) return false;
+        Set<T> reached = new HashSet<>();
+
+        Iterator<T> iter = this.vertices.iterator();
+
+        while(iter.hasNext()){
+            T vertex = iter.next();
+            reached.addAll(this.reachableFrom(vertex));
+            reached.addAll(this.reachableTo(vertex));
+        }
+
+        if(reached.size() != this.vertices.size()) return false;
+        for(T v : reached) if(!this.vertices.contains(v)) return false;
 
         return true;
+
     }
 
     public List<Edge<T, U>> selectEdges(Function<Edge<T, U>, Boolean> filter){
@@ -138,6 +186,32 @@ public class Graph<T, U> {
     public void applyOnEdges(Function<Edge<T, U>, Boolean> filter, Consumer<Edge<T, U>> func){
         if(func == null) return;
         for(Edge<T, U> edge : this.selectEdges(filter)) func.accept(edge);
+    }
+
+    public boolean hasCycle(){
+        return !this.vertices.stream().noneMatch(v -> this.reachableFrom(v).contains(v));
+    }
+
+    public Graph<T, U> minSpanningTree(Comparator<U> comparator){
+
+        if(!this.isWeaklyConnected() || comparator == null) return null;
+
+        Graph<T, U> minTree = new Graph<>(new HashSet<>(this.vertices));
+        List<Edge<T, U>> edges = new ArrayList<>(this.edges);
+        edges.sort( (e1, e2) -> {return comparator.compare(e1.getCost(), e2.getCost());});
+
+        Iterator<Edge<T, U>> iter = edges.iterator();
+        int counter = 0;
+
+        while(iter.hasNext() && counter < this.vertices.size() - 1){
+            Edge<T, U> edge = iter.next();
+            if(!minTree.add(edge)) continue;
+            if(minTree.hasCycle()) minTree.remove(edge);
+            else counter++;
+        }
+
+        return minTree;
+
     }
     
 }

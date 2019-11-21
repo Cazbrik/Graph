@@ -6,10 +6,12 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.function.BiFunction;
+import java.util.Comparator;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Assertions;
+
  
 public class TestGraph{
     
@@ -19,12 +21,12 @@ public class TestGraph{
     public void init(){
         Set<String> vertices = new HashSet<>(Arrays.asList("Red", "Blue", "Green", "Yellow", "Black", "White"));
         List<Edge<String, Integer>> edges = new ArrayList<>();
-        edges.add(new Edge<>("Red", "Blue"));
-        edges.add(new Edge<>("Red", "Green"));
-        edges.add(new Edge<>("Green", "Yellow"));
-        edges.add(new Edge<>("Yellow", "Red"));
-        edges.add(new Edge<>("Blue", "White"));
-        edges.add(new Edge<>("White", "Black"));
+        edges.add(new Edge<>("Red", "Blue", 7));
+        edges.add(new Edge<>("Red", "Green", 2));
+        edges.add(new Edge<>("Green", "Yellow", 3));
+        edges.add(new Edge<>("Yellow", "Red", 4));
+        edges.add(new Edge<>("Blue", "White", 5));
+        edges.add(new Edge<>("White", "Black", 6));
         this.graph = new Graph<String, Integer>(vertices, edges);
     }
 
@@ -170,7 +172,7 @@ public class TestGraph{
     @Test
     public void testRemovePresentEdge(){
         int nb = this.graph.getEdges().size();
-        Assertions.assertTrue(this.graph.remove(new Edge<>("Yellow", "Red")));
+        Assertions.assertTrue(this.graph.remove(new Edge<>("Yellow", "Red", 4)));
         Assertions.assertEquals(nb - 1, this.graph.getEdges().size());
         this.checkVertexEdgeAndExist("Red", 2, true);
         this.checkVertexEdgeAndExist("Yellow", 1, true);
@@ -192,26 +194,26 @@ public class TestGraph{
     public void testGetRelatedEdgePresentNode(){
         List<Edge<String, Integer>> list = this.graph.getRelatedEdge("Red");
         Assertions.assertEquals(3, list.size());
-        Assertions.assertTrue(list.contains(new Edge<>("Yellow", "Red")));
-        Assertions.assertTrue(list.contains(new Edge<>("Red", "Blue")));
-        Assertions.assertTrue(list.contains(new Edge<>("Red", "Green")));
+        Assertions.assertTrue(list.contains(new Edge<>("Yellow", "Red", 4)));
+        Assertions.assertTrue(list.contains(new Edge<>("Red", "Blue", 7)));
+        Assertions.assertTrue(list.contains(new Edge<>("Red", "Green", 2)));
     }
 
     @Test
-    public void testGetRelatedVertexNotPresentNode(){
-        List<String> list = this.graph.getRelatedVertex("Purple");
+    public void testgetChildrenVerticesNotPresentNode(){
+        List<String> list = this.graph.getChildrenVertices("Purple");
         Assertions.assertTrue(list.isEmpty());
     }
 
     @Test
-    public void testGetRelatedVertexNullNode(){
-        List<String> list = this.graph.getRelatedVertex(null);
+    public void testgetChildrenVerticesNullNode(){
+        List<String> list = this.graph.getChildrenVertices(null);
         Assertions.assertTrue(list.isEmpty());
     }
 
     @Test
-    public void testGetRelatedVertexPresentNode(){
-        List<String> list = this.graph.getRelatedVertex("Red");
+    public void testgetChildrenVerticesPresentNode(){
+        List<String> list = this.graph.getChildrenVertices("Red");
         Assertions.assertEquals(2, list.size());
         Assertions.assertTrue(list.contains("Blue"));
         Assertions.assertTrue(list.contains("Green"));
@@ -224,7 +226,7 @@ public class TestGraph{
     }
 
     @Test
-    public void testReachableFromNotNull(){
+    public void testReachableFromNull(){
         Set<String> list = this.graph.reachableFrom(null);
         Assertions.assertTrue(list.isEmpty());
     }
@@ -239,22 +241,155 @@ public class TestGraph{
         Assertions.assertTrue(list.contains("Yellow"));
         Assertions.assertTrue(list.contains("Black"));
         Assertions.assertTrue(list.contains("White"));
+
+        list = this.graph.reachableFrom("White");
+        Assertions.assertEquals(1, list.size());
+        Assertions.assertTrue(list.contains("Black"));
     }
 
     @Test
-    public void testConnectedGraph(){
-        Assertions.assertTrue(this.graph.isConnected());
+    public void testReachableToNotPresent(){
+        Set<String> list = this.graph.reachableFrom("Purple");
+        Assertions.assertTrue(list.isEmpty());
     }
 
     @Test
-    public void testNotConnectedGraph(){
+    public void testReachableToNull(){
+        Set<String> list = this.graph.reachableFrom(null);
+        Assertions.assertTrue(list.isEmpty());
+    }
+
+    @Test
+    public void testReachableToPresent(){
+        Set<String> list = this.graph.reachableTo("White");
+        Assertions.assertEquals(4, list.size());
+        Assertions.assertTrue(list.contains("Red"));
+        Assertions.assertTrue(list.contains("Blue"));
+        Assertions.assertTrue(list.contains("Green"));
+        Assertions.assertTrue(list.contains("Yellow"));
+
+        list = this.graph.reachableTo("Red");
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertTrue(list.contains("Yellow"));
+        Assertions.assertTrue(list.contains("Green"));
+        Assertions.assertTrue(list.contains("Red"));
+    }
+
+    @Test
+    public void testStronglyConnectedGraph(){
+        Assertions.assertTrue(this.graph.isStronglyConnected());
+    }
+
+    @Test
+    public void testNotStronglyConnectedGraph(){
         this.graph.add("Purple");
-        Assertions.assertFalse(this.graph.isConnected());
+        Assertions.assertFalse(this.graph.isStronglyConnected());
     }
 
     @Test
-    public void testNotConnectedEmptyGraph(){
-        Assertions.assertFalse(new Graph<String, Integer>().isConnected());
+    public void testNotStronglyConnectedEmptyGraph(){
+        Assertions.assertFalse(new Graph<String, Integer>().isStronglyConnected());
     }
+
+    @Test
+    public void testWeaklyConnectedGraph(){
+        Assertions.assertTrue(this.graph.isWeaklyConnected());
+    }
+
+    @Test
+    public void testNotWeaklyConnectedGraph(){
+        this.graph.add("Purple");
+        Assertions.assertFalse(this.graph.isWeaklyConnected());
+    }
+
+    @Test
+    public void testNotWeaklyConnectedEmptyGraph(){
+        Assertions.assertFalse(new Graph<String, Integer>().isWeaklyConnected());
+    }
+
+    @Test
+    public void testNotStronglyButWeaklyConnected(){
+        this.graph.add("Purple");
+        this.graph.add(new Edge<>("Purple", "Black", 3));
+        Assertions.assertTrue(this.graph.isWeaklyConnected());
+        Assertions.assertFalse(this.graph.isStronglyConnected());
+    }
+
+    @Test
+    public void testHasCycleEmptyGraph(){
+        Assertions.assertFalse(new Graph<String, Integer>().hasCycle());
+    }
+
+    @Test
+    public void testHasCycle(){
+        Assertions.assertTrue(this.graph.hasCycle());
+    }
+
+    @Test
+    public void testHasNoCycle(){
+        this.graph.remove(new Edge<>("Yellow", "Red", 4));
+        Assertions.assertFalse(this.graph.hasCycle());
+    }
+
+    @Test
+    public void testMinSpanningTreeNotConnected(){
+        this.graph.add("Purple");
+        Comparator<Integer> comp = (i1, i2) -> {
+            if(i1 == null) return -1;
+            if(i2 == null) return 1;
+            return i1 - i2;
+        };
+        Assertions.assertEquals(null, this.graph.minSpanningTree(comp));
+    }
+
+    @Test
+    public void testMinSpanningTreeNoCompFunc(){
+        Assertions.assertEquals(null, this.graph.minSpanningTree(null));
+    }
+
+    @Test
+    public void testMinSpanningTreeConnected(){
+
+        Comparator<Integer> comp = (i1, i2) -> {
+            if(i1 == null) return -1;
+            if(i2 == null) return 1;
+            return i1 - i2;
+        };
+
+        Graph<String, Integer> minTree = this.graph.minSpanningTree(comp);
+        List<Edge<String, Integer>> edges = minTree.getEdges();
+        Assertions.assertEquals(this.graph.getVertices().size() - 1, edges.size());
+        Assertions.assertTrue(edges.contains(new Edge<>("Red", "Blue", 7)));
+        Assertions.assertTrue(edges.contains(new Edge<>("Red", "Green", 2)));
+        Assertions.assertTrue(edges.contains(new Edge<>("Green", "Yellow", 3)));
+        Assertions.assertTrue(edges.contains(new Edge<>("Blue", "White", 5)));
+        Assertions.assertTrue(edges.contains(new Edge<>("White", "Black", 6)));
+
+    }
+
+    @Test
+    public void testMinSpanningTreeConnectedDifferent(){
+
+        
+        this.graph.remove(new Edge<>("Yellow", "Red", 4));
+        this.graph.add(new Edge<>("Yellow", "Red", 1));
+
+        Comparator<Integer> comp = (i1, i2) -> {
+            if(i1 == null) return -1;
+            if(i2 == null) return 1;
+            return i1 - i2;
+        };
+
+        Graph<String, Integer> minTree = this.graph.minSpanningTree(comp);
+        List<Edge<String, Integer>> edges = minTree.getEdges();
+        Assertions.assertEquals(this.graph.getVertices().size() - 1, edges.size());
+        Assertions.assertTrue(edges.contains(new Edge<>("Red", "Blue", 7)));
+        Assertions.assertTrue(edges.contains(new Edge<>("Yellow", "Red", 1)));
+        Assertions.assertTrue(edges.contains(new Edge<>("Red", "Green", 2)));
+        Assertions.assertTrue(edges.contains(new Edge<>("Blue", "White", 5)));
+        Assertions.assertTrue(edges.contains(new Edge<>("White", "Black", 6)));
+
+    }
+
 
 }

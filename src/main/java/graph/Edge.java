@@ -60,4 +60,8 @@ public class Edge<T, U> {
         return this.end;
     }
 
+    public U getCost(){
+        return this.cost;
+    }
+
 }
