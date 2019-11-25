@@ -134,13 +134,16 @@ public class TestOrientedGraph{
 
     @Test
     public void testStronglyConnectedNotConnected(){
-        this.simple.addVertex(-1);
+        this.simple.addVertex(0);
         Assertions.assertFalse(this.simple.isStronglyConnected());
     }
 
     @Test
     public void testStronglyConnectedButWeaklyConnected(){
-        //Todo
+        this.simple.addVertex(-1);
+        this.simple.addVertex(13);
+        Assertions.assertFalse(this.simple.isStronglyConnected());
+        Assertions.assertTrue(this.simple.isWeaklyConnected());
     }
 
     @Test
@@ -150,7 +153,7 @@ public class TestOrientedGraph{
 
     @Test
     public void testWeaklyConnectedNotConnected(){
-        this.simple.addVertex(-1);
+        this.simple.addVertex(0);
         Assertions.assertFalse(this.simple.isWeaklyConnected());
     }
 
@@ -180,14 +183,18 @@ class SimpleGraph extends OrientedGraph<Integer, Integer>{
 
     public SimpleGraph(List<Integer> graph){
         super(
-            e -> {return graph.get(e);},
-            e -> {return graph.get(e + 1);}
+            e -> { return (graph.get(e) >= 0) ? graph.get(e) : graph.get(e + 1);},
+            e -> { return (graph.get(e) >= 0) ? graph.get(e + 1) : graph.get(e);}
         );
         this.graph = graph;
     }
 
+    public List<Integer> getGraph() {
+        return this.graph;
+    }
+
     public void addVertex(Integer vertex){
-        if(vertex < 0) this.nullCounter++;
+        if(vertex == 0) this.nullCounter++;
         this.graph.add(vertex);
     }
 
@@ -226,6 +233,11 @@ class SimpleGraph extends OrientedGraph<Integer, Integer>{
 
         return edges;
         
+    }
+
+    @Override
+    public String toString(){
+        return this.graph.toString();
     }
 
 }
