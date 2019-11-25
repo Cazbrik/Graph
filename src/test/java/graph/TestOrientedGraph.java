@@ -173,7 +173,6 @@ public class TestOrientedGraph{
         Assertions.assertTrue(this.simple.hasCycle());
     }
 
-
 }
 
 class SimpleGraph extends OrientedGraph<Integer, Integer>{
@@ -183,8 +182,8 @@ class SimpleGraph extends OrientedGraph<Integer, Integer>{
 
     public SimpleGraph(List<Integer> graph){
         super(
-            e -> { return (graph.get(e) >= 0) ? graph.get(e) : graph.get(e + 1);},
-            e -> { return (graph.get(e) >= 0) ? graph.get(e + 1) : graph.get(e);}
+            e -> { return (graph.get(e) >= 0) ? graph.get(e) : graph.get(e + 1); },
+            e -> { return (graph.get(e) >= 0) ? graph.get(e + 1) : graph.get(e); }
         );
         this.graph = graph;
     }
