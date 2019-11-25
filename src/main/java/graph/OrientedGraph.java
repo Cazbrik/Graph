@@ -4,8 +4,10 @@ import java.util.Iterator;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 public abstract class OrientedGraph<V, E> {
 
@@ -21,8 +23,8 @@ public abstract class OrientedGraph<V, E> {
     private Function<E, V> start, end;
 
     public OrientedGraph(Function<E, V> start, Function<E, V> end){
-        this.start= start;
-        this.end = end;
+        this.start= Objects.requireNonNull(start, "Start operation must not be null");
+        this.end = Objects.requireNonNull(end, "End operation must not be null");;
     }
 
     /**
@@ -41,6 +43,8 @@ public abstract class OrientedGraph<V, E> {
 
     abstract public Collection<E> getEdges();
 
+    abstract public void setEdges(List<E> edges);
+
     abstract public Collection<E> relatedEdges(V vertex);
 
     /**
@@ -48,12 +52,15 @@ public abstract class OrientedGraph<V, E> {
     * Because theses do not depend on graph representation
     */
 
-    public Set<V> childrenVertices(V vertex){
-        return this.relatedEdges(vertex).stream().filter(x -> this.start.apply(x).equals(vertex)).map(x -> this.end.apply(x)).collect(Collectors.toSet());
+    public Collection<V> childrenVertices(V vertex){
+        return this.relatedEdges(vertex).stream()
+        .filter(x -> this.start.apply(x).equals(vertex))
+        .map(x -> this.end.apply(x))
+        .collect(Collectors.toList());
     }
 
     public Collection<V> parentsVertices(V vertex){
-        return this.relatedEdges(vertex).stream().filter(x -> this.end.apply(x).equals(vertex)).map(x -> this.start.apply(x)).collect(Collectors.toSet());
+        return this.relatedEdges(vertex).stream().filter(x -> this.end.apply(x).equals(vertex)).map(x -> this.start.apply(x)).collect(Collectors.toList());
     }
 
     private void reachableRec(V vertex, Set<V> reached){
@@ -88,8 +95,9 @@ public abstract class OrientedGraph<V, E> {
         Iterator<V> iter = vertices.iterator();
         
         while(iter.hasNext()){
-
-            Set<V> reached  = this.reachableFrom(iter.next());
+            V v = iter.next();
+            Set<V> reached  = this.reachableFrom(v);
+            reached.add(v);
             if(reached.size() != vertices.size()) continue;
             for(V vertex : reached) if(!vertices.contains(vertex)) continue;
 
