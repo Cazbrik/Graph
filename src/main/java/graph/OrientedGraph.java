@@ -31,17 +31,21 @@ public abstract class OrientedGraph<V, E> {
     * Graph related operation that can not be implemented
     */
 
+    abstract public Collection<V> getVertices();
+
+    abstract public Collection<E> getEdges();
+
+    /**
+    * Graph related operation that can not be implemented
+    */
+
     abstract public void addVertex(V vertex);
 
     abstract public void removeVertex(V vertex);
 
-    abstract public Collection<V> getVertices();
-
     abstract public void addEdge(E edge);
 
     abstract public void removeEdge(E edge);
-
-    abstract public Collection<E> getEdges();
 
     abstract public void setEdges(List<E> edges);
 
@@ -53,7 +57,7 @@ public abstract class OrientedGraph<V, E> {
     */
 
     public Collection<V> childrenVertices(V vertex){
-        return this.relatedEdges(vertex).stream()
+        return this.getEdges().stream()
         .filter(x -> this.start.apply(x).equals(vertex))
         .map(x -> this.end.apply(x))
         .collect(Collectors.toList());
@@ -63,20 +67,10 @@ public abstract class OrientedGraph<V, E> {
         return this.relatedEdges(vertex).stream().filter(x -> this.end.apply(x).equals(vertex)).map(x -> this.start.apply(x)).collect(Collectors.toList());
     }
 
-    private void reachableRec(V vertex, Set<V> reached){
-        for(V v : this.childrenVertices(vertex)) 
-            if(reached.add(v)) reachableRec(v, reached);
-    }
-
     public Set<V> reachableFrom(V vertex){
         Set<V> reached = new HashSet<>();
         this.reachableRec(vertex, reached);
         return reached;
-    }
-
-    private void reachableToRec(V vertex, Set<V> reached){
-        for(V el : this.parentsVertices(vertex)) 
-            if(reached.add(el)) reachableToRec(el, reached);
     }
 
     public Set<V> reachableTo(V vertex){
@@ -92,10 +86,7 @@ public abstract class OrientedGraph<V, E> {
 
         if(vertices.isEmpty() || vertices.size() > edges.size() + 1) return false;
 
-        Iterator<V> iter = vertices.iterator();
-        
-        while(iter.hasNext()){
-            V v = iter.next();
+        for(V v : vertices) {
             Set<V> reached  = this.reachableFrom(v);
             reached.add(v);
             if(reached.size() != vertices.size()) continue;
@@ -158,4 +149,13 @@ public abstract class OrientedGraph<V, E> {
         return builder.toString();
     }
     
+    private void reachableRec(V vertex, Set<V> reached){
+        for(V v : this.childrenVertices(vertex)) 
+            if(reached.add(v)) reachableRec(v, reached);
+    }
+
+    private void reachableToRec(V vertex, Set<V> reached){
+        for(V el : this.parentsVertices(vertex)) 
+            if(reached.add(el)) reachableToRec(el, reached);
+    }
 }
