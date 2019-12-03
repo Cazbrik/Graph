@@ -1,4 +1,7 @@
-package graph;
+package lib;
+
+import java.util.Optional;
+import java.util.Set;
 
 public interface WeightedOrientedGraph<V, C> extends OrientedGraph<V> {
 

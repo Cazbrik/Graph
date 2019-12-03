@@ -1,4 +1,7 @@
-package graph;
+package lib;
+
+import java.util.Set;
+import java.util.Optional;
 
 public interface WeightedGraph<V, C> extends Graph<V> {
 

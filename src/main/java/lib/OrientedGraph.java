@@ -1,12 +1,19 @@
-package graph;
+package lib;
 
-import java.util.optional;
+import java.util.Optional;
+import java.util.Set;
 
 public interface OrientedGraph<V> {
+    
 
     Set<V> childrenVertices(V vertex);
 
-    Set<V> parentVertices(V vertex);
+    Set<V> parentsVertices(V vertex);
+
+    Set<V> relatedVertices(V vertex);
+
+
+    Set<V> reachableVertices(V vertex);
 
     Set<V> reachableFrom(V vertex);
 
