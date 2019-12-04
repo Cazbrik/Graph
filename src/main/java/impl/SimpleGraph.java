@@ -47,8 +47,6 @@ public class SimpleGraph<V> implements Graph<V>, OrientedGraph<V> {
         return reached;
     }
 
-
-
     public Set<V> reachableFrom(V vertex){
         Set<V> reached = new HashSet<>();
         this.reachableFromRec(vertex, reached);
@@ -87,6 +85,7 @@ public class SimpleGraph<V> implements Graph<V>, OrientedGraph<V> {
         }
 
         return false;
+        
     }
 
     public boolean isWeaklyConnected(){
