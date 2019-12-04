@@ -47,8 +47,6 @@ public class SimpleGraph<V> implements Graph<V>, OrientedGraph<V> {
         return reached;
     }
 
-
-
     public Set<V> reachableFrom(V vertex){
         Set<V> reached = new HashSet<>();
         this.reachableFromRec(vertex, reached);
@@ -87,6 +85,7 @@ public class SimpleGraph<V> implements Graph<V>, OrientedGraph<V> {
         }
 
         return false;
+        
     }
 
     public boolean isWeaklyConnected(){
@@ -117,10 +116,6 @@ public class SimpleGraph<V> implements Graph<V>, OrientedGraph<V> {
         return !this.vertices.get().stream().noneMatch(v -> this.reachableFrom(v).contains(v));
     }
 
-    public Optional<Set<Pair<V>>> spanningTree(){
-        return Optional.empty();
-    }
-
     private void reachableFromRec(V vertex, Set<V> reached){
         for(V v : this.childrenVertices(vertex)) 
             if(reached.add(v)) reachableFromRec(v, reached);
@@ -136,6 +131,14 @@ public class SimpleGraph<V> implements Graph<V>, OrientedGraph<V> {
         if(reached.containsAll(related)) return;
         reached.addAll(related);
         for(V v : related) this.weaklyConnectedRec(v, reached);
+    }
+
+    /**
+    * Not Implemented yet
+    */
+
+    public Optional<Set<Pair<V>>> spanningTree(){
+        return Optional.empty();
     }
 
 }
