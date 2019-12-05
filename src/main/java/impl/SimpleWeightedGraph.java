@@ -1,7 +1,7 @@
 package impl;
 
 import lib.Pair;
-import lib.WeightedGraph;
+import lib.WeightedNonOrientedGraph;
 import lib.WeightedOrientedGraph;
 
 import java.util.Optional;
@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.Comparator;
 
-public class SimpleWeightedGraph<V, C> implements WeightedGraph<V, C>, WeightedOrientedGraph<V, C> {
+public class SimpleWeightedGraph<V, C> implements WeightedNonOrientedGraph<V, C>, WeightedOrientedGraph<V, C> {
 
     private SimpleGraph<V> graph;
     private BiFunction<V, V, C> cost;

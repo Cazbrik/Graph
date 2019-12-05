@@ -3,7 +3,7 @@ package lib;
 import java.util.Set;
 import java.util.Optional;
 
-public interface WeightedGraph<V, C> extends Graph<V> {
+public interface WeightedNonOrientedGraph<V, C> extends NonOrientedGraph<V> {
 
     C getCost(V v1, V v2);
 

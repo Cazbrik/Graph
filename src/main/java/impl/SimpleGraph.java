@@ -1,7 +1,7 @@
 package impl;
 
 import lib.Pair;
-import lib.Graph;
+import lib.NonOrientedGraph;
 import lib.OrientedGraph;
 
 import java.util.Set;
@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 import java.util.Optional;
 import java.util.Objects;
 
-public class SimpleGraph<V> implements Graph<V>, OrientedGraph<V> {
+public class SimpleGraph<V> implements NonOrientedGraph<V>, OrientedGraph<V> {
 
     private Function<V, Set<V>> children;
     private Function<V, Set<V>> parents;
