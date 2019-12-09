@@ -12,7 +12,11 @@ public class OrientedGraphOperations<V> {
     private NonOrientedGraphOperations<V> operator;
 
     public OrientedGraphOperations(Supplier<Set<V>> vertices, Function<V, Set<V>> children, Function<V, Set<V>> parents){
-        //this(new NonOrientedGraphOperations<>(vertices, x -> related(x)), children, parents);
+        this(new NonOrientedGraphOperations<>(vertices, x -> {
+            Set<V> related = children.apply(x);
+            related.addAll(parents.apply(x));
+            return related;
+        }), children, parents);
     }
 
     public OrientedGraphOperations(NonOrientedGraphOperations<V> operator, Function<V, Set<V>> children, Function<V, Set<V>> parents){
@@ -22,9 +26,7 @@ public class OrientedGraphOperations<V> {
     }
 
     public Set<V> related(V vertex){
-        Set<V> related = this.children.apply(vertex);
-        related.addAll(this.parents.apply(vertex));
-        return related;
+        return this.operator.related.apply(vertex);
     }
 
     public Set<V> reachable(V vertex){
