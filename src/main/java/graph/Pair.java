@@ -1,4 +1,4 @@
-package lib;
+package graph;
 
 public class Pair<V> {
 
