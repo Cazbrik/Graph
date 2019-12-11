@@ -74,7 +74,7 @@ public class OrientedGraphOperations<V> {
     }
 
     public Optional<Set<Pair<V>>> spanningTree(){
-        return this.operator.spanningTree();
+        return Optional.empty();
     }
 
     /** Private method */
