@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public class OrientedGraphOperations<V> {
 
-    private Function<V, Set<V>> children, parents;
+    public Function<V, Set<V>> children, parents;
     private NonOrientedGraphOperations<V> operator;
 
     public OrientedGraphOperations(Supplier<Set<V>> vertices, Function<V, Set<V>> children, Function<V, Set<V>> parents){
