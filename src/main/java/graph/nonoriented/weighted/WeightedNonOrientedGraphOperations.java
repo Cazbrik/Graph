@@ -1,4 +1,4 @@
-package graph;
+package graph.nonoriented.weighted;
 
 import java.util.Set;
 import java.util.Optional;
@@ -7,17 +7,24 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.Comparator;
 
+import graph.nonoriented.unweighted.NonOrientedGraphOperations;
+import utils.Pair;
+
 /** Not finished */
 public class WeightedNonOrientedGraphOperations<V, C>  {
 
-    public NonOrientedGraphOperations<V> operator;
-    public BiFunction<V, V, Set<V>> cost;
-    public Comparator<C> comparator;
-    
+    private NonOrientedGraphOperations<V> operator;
+    private ShortestPath<V, C> shortestPath;
+    private MinSpanningTree<V, C> minSpanningTree;
+
     public WeightedNonOrientedGraphOperations(Supplier<Set<V>> vertices, Function<V, Set<V>> related, BiFunction<V, V, Set<V>> cost, Comparator<C> comparator){
-        this.operator = new NonOrientedGraphOperations<>(vertices, related);
-        this.cost = cost;
-        this.comparator = comparator;
+        this(new NonOrientedGraphOperations<>(vertices, related), cost, comparator);
+    }
+
+    public WeightedNonOrientedGraphOperations(NonOrientedGraphOperations<V> operator, BiFunction<V, V, Set<V>> cost, Comparator<C> comparator) {
+        this.operator = operator;
+        this.shortestPath = new ShortestPath<>(cost, comparator);
+        this.minSpanningTree = new MinSpanningTree<>(cost, comparator);
     }
 
     public Set<V> reachable(V vertex) {
@@ -36,14 +43,12 @@ public class WeightedNonOrientedGraphOperations<V, C>  {
         return this.operator.spanningTree();
     }
 
-
-
     public Optional<Set<Pair<V>>> minSpanningTree(){
-        return Optional.empty();
+        return this.minSpanningTree.get();
     }
 
-    public Optional<Set<V>> shortestPath(){
-        return Optional.empty();
+    public Optional<Set<Pair<V>>> shortestPath(){
+        return this.shortestPath.get();
     }
 
 }
