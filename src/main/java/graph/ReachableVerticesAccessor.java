@@ -6,9 +6,9 @@ import java.util.function.Function;
 
 public class ReachableVerticesAccessor<V> {
 
-    private Function<V, Set<V>> related;
+    private Function<? super V, ? extends Set<? extends V>> related;
 
-    public ReachableVerticesAccessor(Function<V, Set<V>> related){
+    public ReachableVerticesAccessor(Function<? super V, ? extends Set<? extends V>> related){
         this.related = related;
     }
 
@@ -19,7 +19,7 @@ public class ReachableVerticesAccessor<V> {
     }
 
     private void getRec(V vertex, Set<V> reached){
-        Set<V> neighbors = this.related.apply(vertex);
+        Set<? extends V> neighbors = this.related.apply(vertex);
         for(V v : neighbors){
             if(!reached.contains(v)){
                 reached.add(v);
