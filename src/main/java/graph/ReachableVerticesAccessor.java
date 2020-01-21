@@ -1,14 +1,14 @@
-package graph.nonoriented.unweighted;
+package graph;
 
 import java.util.Set;
 import java.util.HashSet;
 import java.util.function.Function;
 
-public class Reachable<V> {
+public class ReachableVerticesAccessor<V> {
 
     private Function<V, Set<V>> related;
 
-    public Reachable(Function<V, Set<V>> related){
+    public ReachableVerticesAccessor(Function<V, Set<V>> related){
         this.related = related;
     }
 

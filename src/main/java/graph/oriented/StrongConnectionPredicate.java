@@ -1,21 +1,23 @@
-package graph.oriented.unweighted;
+package graph.oriented;
 
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
-public class IsStronglyConnected<V> {
+import graph.ReachableVerticesAccessor;
 
-    private Supplier<Set<V>> vertices;
-    private ReachableFrom<V> reachableFrom;
+public class StrongConnectionPredicate<V> {
 
-    public IsStronglyConnected(Supplier<Set<V>> vertices, ReachableFrom<V> reachableFrom){
+    private Function<Object, Set<V>> vertices;
+    private ReachableVerticesAccessor<V> reachableFrom;
+
+    public StrongConnectionPredicate(Function<Object, Set<V>> vertices, ReachableVerticesAccessor<V> reachableFrom){
         this.vertices = vertices;
         this.reachableFrom = reachableFrom;
     }
     
-    public boolean check() {
+    public boolean test(Object graph) {
 
-        Set<V> vertices = this.vertices.get();
+        Set<V> vertices = this.vertices.apply(graph);
 
         if(vertices.isEmpty()) return false;
 
